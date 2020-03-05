@@ -33,7 +33,7 @@
  */
 int knowledge_get(const char *intent, const char *entity, char *response, int n) {
 
-	/* to be implemented */
+	/* TODO: implement */
 
 	return KB_NOTFOUND;
 
@@ -57,7 +57,7 @@ int knowledge_get(const char *intent, const char *entity, char *response, int n)
  */
 int knowledge_put(const char *intent, const char *entity, const char *response) {
 
-	/* to be implemented */
+	/* TODO: implement */
 
 	return KB_INVALID;
 
@@ -74,7 +74,7 @@ int knowledge_put(const char *intent, const char *entity, const char *response) 
  */
 int knowledge_read(FILE *f) {
 
-	/* to be implemented */
+	/* TODO: implement */
 
 	return 0;
 }
@@ -85,7 +85,7 @@ int knowledge_read(FILE *f) {
  */
 void knowledge_reset() {
 
-	/* to be implemented */
+	/* TODO: implement */
 
 }
 
@@ -98,6 +98,6 @@ void knowledge_reset() {
  */
 void knowledge_write(FILE *f) {
 
-	/* to be implemented */
+	/* TODO: implement */
 
 }
