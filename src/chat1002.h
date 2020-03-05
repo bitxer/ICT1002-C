@@ -36,7 +36,7 @@
 /* Recognised intent */
 #define WHERE   "WHERE"
 #define WHAT    "WHAT"
-#define WHo     "WHO"
+#define WHO     "WHO"
 
 /* functions defined in main.c */
 int compare_token(const char *token1, const char *token2);

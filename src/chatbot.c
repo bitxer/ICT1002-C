@@ -191,7 +191,7 @@ int chatbot_do_load(int inc, char *inv[], char *response, int n) {
  *  0, otherwise
  */
 int chatbot_is_question(const char *intent) {
-	char reg_intent[3][6] = {"what", "where", "who"};
+	char reg_intent[3][6] = {WHAT, WHERE, WHO};
 	int len = strlen(intent);
 	if (len > 2 && len < 6) {
 		int indx = -1;
