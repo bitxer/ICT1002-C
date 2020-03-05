@@ -66,4 +66,13 @@ void knowledge_reset();
 int knowledge_read(FILE *f);
 void knowledge_write(FILE *f);
 
+
+/* Data structure for Intent */
+typedef struct Intent {
+    char * entity;
+    char * response;
+    struct Intent *next;
+} Intent;
+
+#define INTENTSIZE() (sizeof(Intent))
 #endif

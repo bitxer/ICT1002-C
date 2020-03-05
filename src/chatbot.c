@@ -191,9 +191,25 @@ int chatbot_do_load(int inc, char *inv[], char *response, int n) {
  *  0, otherwise
  */
 int chatbot_is_question(const char *intent) {
-
-	/* TODO: implement */
-
+	char reg_intent[3][6] = {"what", "where", "who"};
+	int len = strlen(intent);
+	if (len > 2 && len < 6) {
+		int indx = -1;
+		switch (intent[2]){
+			case 'a':
+				indx = 0;
+				break;
+			case 'e':
+				indx = 1;
+				break;
+			case 'o':
+				indx = 2;
+				break;
+			default:
+				return 0;
+		}
+		return strcmp(reg_intent[indx], intent) == 0;
+	}
 	return 0;
 
 }
@@ -213,7 +229,7 @@ int chatbot_is_question(const char *intent) {
  *   0 (the chatbot always continues chatting after a question)
  */
 int chatbot_do_question(int inc, char *inv[], char *response, int n) {
-
+	printf("%d\n", INTENTSIZE());
 	/* TODO: implement */
 
 	return 0;
