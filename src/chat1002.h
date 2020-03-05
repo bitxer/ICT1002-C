@@ -4,7 +4,6 @@
  * This file contains the definitions and function prototypes for all of
  * features of the ICT1002 chatbot.
  */
- 
 #ifndef _CHAT1002_H
 #define _CHAT1002_H
 
@@ -27,7 +26,18 @@
 #define KB_NOTFOUND -1
 #define KB_INVALID  -2
 #define KB_NOMEM    -3
- 
+
+/* Instructions for chatbot */
+#define RESET   "RESET"
+#define LOAD    "LOAD"
+#define SAVE    "SAVE"
+#define EXIT    "EXIT"
+
+/* Recognised intent */
+#define WHERE   "WHERE"
+#define WHAT    "WHAT"
+#define WHo     "WHO"
+
 /* functions defined in main.c */
 int compare_token(const char *token1, const char *token2);
 void prompt_user(char *buf, int n, const char *format, ...);
