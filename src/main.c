@@ -16,6 +16,15 @@
 /* word delimiters */
 const char *delimiters = " ?\t\n";
 
+Intent * start_where = NULL;
+Intent * end_where = NULL;
+
+Intent * start_what = NULL;
+Intent * end_what = NULL;
+
+Intent * start_who = NULL;
+Intent * end_who = NULL;
+
 
 /*
  * Main loop.

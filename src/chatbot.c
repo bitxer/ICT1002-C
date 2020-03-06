@@ -190,24 +190,28 @@ int chatbot_do_load(int inc, char *inv[], char *response, int n) {
  *  1, if the intent is "what", "where", or "who"
  *  0, otherwise
  */
-int chatbot_is_question(const char *intent) {
+int chatbot_is_question(char *intent) {
 	char reg_intent[3][6] = {WHAT, WHERE, WHO};
 	int len = strlen(intent);
 	if (len > 2 && len < 6) {
 		int indx = -1;
 		switch (intent[2]){
+			case 'A':
 			case 'a':
 				indx = 0;
 				break;
+			case 'E':
 			case 'e':
 				indx = 1;
 				break;
+			case 'O':
 			case 'o':
 				indx = 2;
 				break;
 			default:
 				return 0;
 		}
+		strtoupper(intent);
 		return strcmp(reg_intent[indx], intent) == 0;
 	}
 	return 0;
@@ -229,7 +233,17 @@ int chatbot_is_question(const char *intent) {
  *   0 (the chatbot always continues chatting after a question)
  */
 int chatbot_do_question(int inc, char *inv[], char *response, int n) {
-	printf("%d\n", INTENTSIZE());
+	Intent * current = NULL;
+
+	if (!strcmp(WHAT, inv[0])) {
+		printf(WHAT);
+	} else if (!strcmp(WHERE, inv[0])) {
+		printf(WHERE);
+	} else if (!strcmp(WHO, inv[0])) {
+		printf(WHO);
+	} else {
+		printf("END");
+	}
 	/* TODO: implement */
 
 	return 0;
