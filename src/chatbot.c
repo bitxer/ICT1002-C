@@ -87,6 +87,8 @@ int chatbot_main(int inc, char *inv[], char *response, int n) {
 		return 0;
 	}
 
+	int *indx;
+	*indx = -1;
 	/* look for an intent and invoke the corresponding do_* function */
 	if (chatbot_is_exit(inv[0]))
 		return chatbot_do_exit(inc, inv, response, n);
@@ -190,39 +192,15 @@ int chatbot_do_load(int inc, char *inv[], char *response, int n) {
  *  1, if the intent is "what", "where", or "who"
  *  0, otherwise
  */
-int chatbot_is_question(char *intent) {
+int chatbot_is_question(const char *intent) {
 	char reg_intent[3][6] = {WHAT, WHERE, WHO};
-	int len = strlen(intent);
-	if (len > 2 && len < 6) {
-		int indx = -1;
-		switch (intent[2]){
-			case 'A':
-			case 'a':
-				indx = 0;
-				break;
-			case 'E':
-			case 'e':
-				indx = 1;
-				break;
-			case 'O':
-			case 'o':
-				indx = 2;
-				break;
-			default:
-				return 0;
-		}
-		strtoupper(intent);
-		if (strcmp(reg_intent[indx], intent) == 0){
-			indx = indx + '0';
-			intent = indx;
-			printf("%d, %s", indx, intent);
+	int j = -1;
+	for (int i = 0; i < 3; i++) {
+		if (compare_token(reg_intent[i], intent) == 0) {
 			return 1;
-		} else {
-			return 0;
 		}
 	}
 	return 0;
-
 }
 
 
@@ -240,15 +218,20 @@ int chatbot_is_question(char *intent) {
  *   0 (the chatbot always continues chatting after a question)
  */
 int chatbot_do_question(int inc, char *inv[], char *response, int n) {
-	int useless = 0;
-	if (strlen(inv[1]) == 2 && !strcmp(inv[1], "is")){
-		useless = 1;
-	} else if (strlen(inv[1]) == 3 && !strcmp(inv[1], "are")){
-		useless = 1;
-	}
-	
+	if (compare_token(inv[0], WHAT) == 0) {
+		//TODO: Search WHAT
+		printf("WHAT");
 
-	/* TODO: search linkedlist for known answer */
+	} else if (compare_token(inv[0], WHERE) == 0) {
+		//TODO: Search WHERE
+		printf("WHERE");
+
+	} else if (compare_token(inv[0], WHO) == 0) {
+		//TODO: Search WHO
+		printf("WHO");
+
+	}
+	printf("\n");
 
 	return 0;
 
@@ -266,9 +249,11 @@ int chatbot_do_question(int inc, char *inv[], char *response, int n) {
  *  0, otherwise
  */
 int chatbot_is_reset(const char *intent) {
-
-	/* TODO: implement */
-
+	
+	if (strcmp("RESET", intent) == 0) {
+		//TODO: Implement reset
+		return 1;
+	}
 	return 0;
 
 }

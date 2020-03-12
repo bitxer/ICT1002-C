@@ -50,7 +50,7 @@ int chatbot_is_exit(const char *intent);
 int chatbot_do_exit(int inc, char *inv[], char *response, int n);
 int chatbot_is_load(const char *intent);
 int chatbot_do_load(int inc, char *inv[], char *response, int n);
-int chatbot_is_question(char *intent);
+int chatbot_is_question(const char *intent);
 int chatbot_do_question(int inc, char *inv[], char *response, int n);
 int chatbot_is_reset(const char *intent);
 int chatbot_do_reset(int inc, char *inv[], char *response, int n);

@@ -7,5 +7,5 @@
 #
 ###############################################################################
 
-chatmake: main.c chatbot.c knowledge.c utils.c
-	gcc -o ../bin/chatbot main.c chatbot.c knowledge.c utils.c
+chatmake: main.c chatbot.c knowledge.c
+	gcc -o ../bin/chatbot main.c chatbot.c knowledge.c
