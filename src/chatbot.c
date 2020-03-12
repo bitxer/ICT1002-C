@@ -212,7 +212,14 @@ int chatbot_is_question(char *intent) {
 				return 0;
 		}
 		strtoupper(intent);
-		return strcmp(reg_intent[indx], intent) == 0;
+		if (strcmp(reg_intent[indx], intent) == 0){
+			indx = indx + '0';
+			intent = indx;
+			printf("%d, %s", indx, intent);
+			return 1;
+		} else {
+			return 0;
+		}
 	}
 	return 0;
 
@@ -233,18 +240,15 @@ int chatbot_is_question(char *intent) {
  *   0 (the chatbot always continues chatting after a question)
  */
 int chatbot_do_question(int inc, char *inv[], char *response, int n) {
-	Intent * current = NULL;
-
-	if (!strcmp(WHAT, inv[0])) {
-		printf(WHAT);
-	} else if (!strcmp(WHERE, inv[0])) {
-		printf(WHERE);
-	} else if (!strcmp(WHO, inv[0])) {
-		printf(WHO);
-	} else {
-		printf("END");
+	int useless = 0;
+	if (strlen(inv[1]) == 2 && !strcmp(inv[1], "is")){
+		useless = 1;
+	} else if (strlen(inv[1]) == 3 && !strcmp(inv[1], "are")){
+		useless = 1;
 	}
-	/* TODO: implement */
+	
+
+	/* TODO: search linkedlist for known answer */
 
 	return 0;
 

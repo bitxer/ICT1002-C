@@ -70,8 +70,8 @@ void strtoupper(char * string);
 
 /* Data structure for Intent */
 typedef struct Intent {
-    char * entity;
-    char * response;
+    char entity[MAX_ENTITY];
+    char response[MAX_RESPONSE];
     struct Intent *next;
 } Intent;
 

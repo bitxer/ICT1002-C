@@ -17,13 +17,13 @@
 const char *delimiters = " ?\t\n";
 
 Intent * start_where = NULL;
-Intent * end_where = NULL;
+// Intent * end_where = NULL;
 
 Intent * start_what = NULL;
-Intent * end_what = NULL;
+// Intent * end_what = NULL;
 
 Intent * start_who = NULL;
-Intent * end_who = NULL;
+// Intent * end_who = NULL;
 
 
 /*
@@ -53,7 +53,6 @@ int main(int argc, char *argv[]) {
 			/* read the line */
 			printf("%s: ", chatbot_username());
 			fgets(input, MAX_INPUT, stdin);
-
 			/* split it into words */
 			inc = 0;
 			inv[inc] = strtok(input, delimiters);
