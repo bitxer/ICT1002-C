@@ -8,5 +8,4 @@
 ###############################################################################
 
 chatmake: main.c chatbot.c knowledge.c utils.c
-	mkdir ../bin
 	gcc -o ../bin/chatbot main.c chatbot.c knowledge.c utils.c
