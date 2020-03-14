@@ -40,8 +40,6 @@
  * returned by these functions at the start of each line.
  */
 
-#include <stdio.h>
-#include <string.h>
 #include "chat1002.h"
 
 
@@ -194,7 +192,6 @@ int chatbot_do_load(int inc, char *inv[], char *response, int n) {
  */
 int chatbot_is_question(const char *intent) {
 	char reg_intent[3][6] = {WHAT, WHERE, WHO};
-	int j = -1;
 	for (int i = 0; i < 3; i++) {
 		if (compare_token(reg_intent[i], intent) == 0) {
 			return 1;
@@ -218,21 +215,38 @@ int chatbot_is_question(const char *intent) {
  *   0 (the chatbot always continues chatting after a question)
  */
 int chatbot_do_question(int inc, char *inv[], char *response, int n) {
-	if (compare_token(inv[0], WHAT) == 0) {
-		//TODO: Search WHAT
-		printf("WHAT");
-
-	} else if (compare_token(inv[0], WHERE) == 0) {
-		//TODO: Search WHERE
-		printf("WHERE");
-
-	} else if (compare_token(inv[0], WHO) == 0) {
-		//TODO: Search WHO
-		printf("WHO");
-
+	int result = 100;
+	int indx = 0;
+	if (inc > 1) {
+		if (compare_token(inv[1], "is") || compare_token(inv[1], "are")){
+			indx = 2;
+		} else {
+			indx = 1;
+		}
+		result = knowledge_get(inv[0], inv[indx], response, n);
+	} else {
+		snprintf(response, n, "Please ask a question with an entity.");
 	}
-	printf("\n");
 
+	if (result == KB_NOTFOUND) {
+		// Rebuild question to be displayed
+		char question[MAX_INPUT] = "";
+		int len = 0;
+		for (int i = 0; i < inc; i++) {
+			len += strlen(inv[i]) + 1;
+			strcat(question, inv[i]);
+			question[len] = '\0';
+			question[len - 1] = ' ';
+		}
+		// Remove space
+		question[len - 1] = '\0';
+
+		// Capitalise first word in question
+		question[0] = toupper(question[0]);
+		char ans[MAX_RESPONSE];
+		prompt_user(ans, MAX_RESPONSE, "I don't know. %s?", question);
+		knowledge_put(inv[0], inv[indx], ans);
+	}
 	return 0;
 
 }
@@ -249,9 +263,7 @@ int chatbot_do_question(int inc, char *inv[], char *response, int n) {
  *  0, otherwise
  */
 int chatbot_is_reset(const char *intent) {
-	
-	if (strcmp("RESET", intent) == 0) {
-		//TODO: Implement reset
+	if (!compare_token("RESET", intent)) {
 		return 1;
 	}
 	return 0;

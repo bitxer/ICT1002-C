@@ -7,7 +7,10 @@
 #ifndef _CHAT1002_H
 #define _CHAT1002_H
 
+#include <ctype.h>
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 /* the maximum number of characters we expect in a line of input (including the terminating null)  */
 #define MAX_INPUT    256

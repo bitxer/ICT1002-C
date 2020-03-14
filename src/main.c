@@ -6,24 +6,11 @@
  * You should not need to modify this file. You may invoke its functions if you like, however.
  */
 
-#include <ctype.h>
 #include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "chat1002.h"
 
 /* word delimiters */
 const char *delimiters = " ?\t\n";
-
-Intent * start_where = NULL;
-// Intent * end_where = NULL;
-
-Intent * start_what = NULL;
-// Intent * end_what = NULL;
-
-Intent * start_who = NULL;
-// Intent * end_who = NULL;
 
 
 /*
