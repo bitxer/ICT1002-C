@@ -119,9 +119,7 @@ int chatbot_main(int inc, char *inv[], char *response, int n) {
  *  0, otherwise
  */
 int chatbot_is_exit(const char *intent) {
-
 	return compare_token(intent, "exit") == 0 || compare_token(intent, "quit") == 0;
-
 }
 
 
@@ -346,10 +344,10 @@ int chatbot_do_save(int inc, char *inv[], char *response, int n) {
  */
 int chatbot_is_smalltalk(const char *intent) {
 
-	/* TODO: implement */
-
-	return 0;
-
+	return compare_token("Hello", intent) == 0 ||
+			compare_token("It's", intent) == 0 || 
+			compare_token("Good", intent) == 0 ||
+			compare_token("Goodbye", intent) == 0;
 }
 
 
@@ -364,11 +362,17 @@ int chatbot_is_smalltalk(const char *intent) {
  *   1, if the chatbot should stop chatting (e.g. the smalltalk was "goodbye" etc.)
  */
 int chatbot_do_smalltalk(int inc, char *inv[], char *response, int n) {
-
-	/* TODO: implement */
-
+		if (compare_token("Hello", inv[0]) == 0){
+			snprintf(response, n, "Hello");
+		} else if (compare_token("It's", inv[0]) == 0) {
+			snprintf(response, n, "Indeed it is");
+		} else if (compare_token("Good", inv[0]) == 0) {
+			snprintf(response, n, "Good %s", inv[1]);
+		} else if (compare_token("Goodbye", inv[0]) == 0) {
+			snprintf(response, n, "Goodbye");
+			return 1;
+		}
 	return 0;
-
 }
 
 int is_valid_intent(const char * intent) {
