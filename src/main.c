@@ -6,11 +6,7 @@
  * You should not need to modify this file. You may invoke its functions if you like, however.
  */
 
-#include <ctype.h>
 #include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "chat1002.h"
 
 /* word delimiters */
@@ -44,7 +40,6 @@ int main(int argc, char *argv[]) {
 			/* read the line */
 			printf("%s: ", chatbot_username());
 			fgets(input, MAX_INPUT, stdin);
-
 			/* split it into words */
 			inc = 0;
 			inv[inc] = strtok(input, delimiters);

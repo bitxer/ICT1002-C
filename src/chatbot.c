@@ -40,8 +40,6 @@
  * returned by these functions at the start of each line.
  */
 
-#include <stdio.h>
-#include <string.h>
 #include "chat1002.h"
 
 
@@ -87,6 +85,8 @@ int chatbot_main(int inc, char *inv[], char *response, int n) {
 		return 0;
 	}
 
+	int *indx;
+	*indx = -1;
 	/* look for an intent and invoke the corresponding do_* function */
 	if (chatbot_is_exit(inv[0]))
 		return chatbot_do_exit(inc, inv, response, n);
@@ -119,9 +119,7 @@ int chatbot_main(int inc, char *inv[], char *response, int n) {
  *  0, otherwise
  */
 int chatbot_is_exit(const char *intent) {
-
 	return compare_token(intent, "exit") == 0 || compare_token(intent, "quit") == 0;
-
 }
 
 
@@ -191,11 +189,13 @@ int chatbot_do_load(int inc, char *inv[], char *response, int n) {
  *  0, otherwise
  */
 int chatbot_is_question(const char *intent) {
-
-	/* TODO: implement */
-
+	char reg_intent[3][6] = {WHAT, WHERE, WHO};
+	for (int i = 0; i < 3; i++) {
+		if (compare_token(reg_intent[i], intent) == 0) {
+			return 1;
+		}
+	}
 	return 0;
-
 }
 
 
@@ -213,9 +213,45 @@ int chatbot_is_question(const char *intent) {
  *   0 (the chatbot always continues chatting after a question)
  */
 int chatbot_do_question(int inc, char *inv[], char *response, int n) {
+	int result = 100;
+	int indx = 0;
+	if (inc > 1) {
+		if (!compare_token(inv[1], "is") || !compare_token(inv[1], "are")){
+			indx = 2;
+		} else {
+			indx = 1;
+		}
+		result = knowledge_get(inv[0], inv[indx], response, n);
+	} else {
+		snprintf(response, n, "Please ask a question with an entity.");
+	}
+	
+	if (result == KB_NOTFOUND) {
+		// Rebuild question to be displayed
+		char question[MAX_INPUT] = "";
+		int len = 0;
+		for (int i = 0; i < inc; i++) {
+			len += strlen(inv[i]) + 1;
+			strcat(question, inv[i]);
+			question[len] = '\0';
+			question[len - 1] = ' ';
+		}
+		// Remove space
+		question[len - 1] = '\0';
 
-	/* TODO: implement */
-
+		// Capitalise first word in question
+		question[0] = toupper(question[0]);
+		char ans[MAX_RESPONSE];
+		prompt_user(ans, MAX_RESPONSE, "I don't know. %s?", question);
+		result = knowledge_put(inv[0], inv[indx] , ans);
+		if (result == KB_OK){
+			snprintf(response, MAX_RESPONSE, "Thank you.");
+		} else if (result == KB_NOMEM) {
+			snprintf(response, MAX_RESPONSE, "Insfficient memory space");
+		} else if (result == KB_INVALID) {
+			snprintf(response, MAX_RESPONSE, "Invalid intent specified");
+		}
+	}
 	return 0;
 
 }
@@ -232,9 +268,9 @@ int chatbot_do_question(int inc, char *inv[], char *response, int n) {
  *  0, otherwise
  */
 int chatbot_is_reset(const char *intent) {
-
-	/* TODO: implement */
-
+	if (!compare_token("RESET", intent)) {
+		return 1;
+	}
 	return 0;
 
 }
@@ -308,10 +344,10 @@ int chatbot_do_save(int inc, char *inv[], char *response, int n) {
  */
 int chatbot_is_smalltalk(const char *intent) {
 
-	/* TODO: implement */
-
-	return 0;
-
+	return compare_token("Hello", intent) == 0 ||
+			compare_token("It's", intent) == 0 || 
+			compare_token("Good", intent) == 0 ||
+			compare_token("Goodbye", intent) == 0;
 }
 
 
@@ -326,9 +362,23 @@ int chatbot_is_smalltalk(const char *intent) {
  *   1, if the chatbot should stop chatting (e.g. the smalltalk was "goodbye" etc.)
  */
 int chatbot_do_smalltalk(int inc, char *inv[], char *response, int n) {
-
-	/* TODO: implement */
-
+		if (compare_token("Hello", inv[0]) == 0){
+			snprintf(response, n, "Hello");
+		} else if (compare_token("It's", inv[0]) == 0) {
+			snprintf(response, n, "Indeed it is");
+		} else if (compare_token("Good", inv[0]) == 0) {
+			snprintf(response, n, "Good %s", inv[1]);
+		} else if (compare_token("Goodbye", inv[0]) == 0) {
+			snprintf(response, n, "Goodbye");
+			return 1;
+		}
 	return 0;
+}
 
+int is_valid_intent(const char * intent) {
+	if (compare_token(intent, WHAT) == 0 || compare_token(intent, WHERE) == 0 || compare_token(intent, WHO) == 0) {
+		return KB_OK;
+	} else {
+		return KB_INVALID;
+	}
 }

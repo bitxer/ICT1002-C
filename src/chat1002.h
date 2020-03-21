@@ -7,7 +7,10 @@
 #ifndef _CHAT1002_H
 #define _CHAT1002_H
 
+#include <ctype.h>
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 /* the maximum number of characters we expect in a line of input (including the terminating null)  */
 #define MAX_INPUT    256
@@ -36,7 +39,19 @@
 /* Recognised intent */
 #define WHERE   "WHERE"
 #define WHAT    "WHAT"
-#define WHo     "WHO"
+#define WHO     "WHO"
+
+/* Data structure for Intent */
+struct Intent {
+    char * entity;
+    char * who;
+    char * what;
+    char * where;
+    struct Intent *next;
+};
+
+typedef struct Intent INTENT;
+typedef INTENT *INTENT_PTR;
 
 /* functions defined in main.c */
 int compare_token(const char *token1, const char *token2);
@@ -65,5 +80,8 @@ int knowledge_put(const char *intent, const char *entity, const char *response);
 void knowledge_reset();
 int knowledge_read(FILE *f);
 void knowledge_write(FILE *f);
+void strtoupper(char * string);
+
+int is_valid_intent(const char * intent);
 
 #endif
