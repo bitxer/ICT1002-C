@@ -18,15 +18,8 @@
 #include "chat1002.h"
 
 
-Intent * start_where = NULL;
-Intent * end_where = NULL;
-
-Intent * start_what = NULL;
-Intent * end_what = NULL;
-
-Intent * start_who = NULL;
-Intent * end_who = NULL;
-
+INTENT_PTR head = NULL;
+INTENT_PTR end = NULL;
 /*
  * Get the response to a question.
  *
@@ -42,28 +35,32 @@ Intent * end_who = NULL;
  *   KB_INVALID, if 'intent' is not a recognised question word
  */
 int knowledge_get(const char *intent, const char *entity, char *response, int n) {
-	Intent * current = NULL;
-
-	if (compare_token(intent, WHAT) == 0) {
-		current = start_what;
-
-	} else if (compare_token(intent, WHERE) == 0) {
-		current = start_where;
-
-	} else if (compare_token(intent, WHO) == 0) {
-		current = start_who;
-	} else {
+	if (is_valid_intent(intent) == KB_INVALID) {
 		// This should not happen since checking have been done previously
 		// Included as safety net
 		snprintf(response, n, "I don't understand \"%s\".", intent);
 		return KB_INVALID;
 	}
-	
+
+	INTENT_PTR current = head;
+
 	while (current != NULL) {
-		if (strcmp(current->entity, current->entity) == 0) {
-			snprintf(response, n, "%s", current->response);
+		if (strcmp(current->entity, entity) == 0) {
+			char * buf = NULL;;
+			if (compare_token(intent, WHAT) == 0) {
+				buf = current->what;
+			} else if (compare_token(intent, WHERE) == 0) {
+				buf = current->where;
+			} else if (compare_token(intent, WHO) == 0) {
+				buf = current->who;
+			}
+			if (buf[0] == '\0') {
+				return KB_NOTFOUND;
+			}
+			snprintf(response, n, "%s", buf);
 			return KB_OK;
 		}
+		current = current->next;
 	}
 	return KB_NOTFOUND;
 
@@ -81,33 +78,52 @@ int knowledge_get(const char *intent, const char *entity, char *response, int n)
  *   response  - the response for this question and entity
  *
  * Returns:
- *   KB_FOUND, if successful
+ *   KB_OK, if successful
  *   KB_NOMEM, if there was a memory allocation failure
  *   KB_INVALID, if the intent is not a valid question word
  */
 int knowledge_put(const char *intent, const char *entity, const char *response) {
+	if (is_valid_intent(intent) == KB_INVALID) {
+		return KB_INVALID;
+	}
 
-	/* TODO: implement */
+	INTENT_PTR current = head;
 
-	// current = malloc(INTENTSIZE())
-	// printf("inv[%d]=%s, %ld, ", 1, inv[1], sizeof(&inv)/sizeof(inv[0]));
-	// for (int i = 1; i < inc; i++) {
-	// 	if (i == 1 && (!compare_token(inv[1], "is") || !compare_token(inv[1], "are"))){
-	// 		continue;
-	// 	}
-	// 	if (strlen(current->entity) + strlen(inv[i]) + 1 > MAX_ENTITY) {
-	// 		printf("Entity is too large");
-	// 		break;
-	// 	}
-	// 	printf("inv[%d]=%s, ", i, inv[i]);
-	// 	strcat(current->entity, inv[i]);
-	// 	current->entity[strlen(current->entity) + 1] = '\0';
-	// 	current->entity[strlen(current->entity)] = ' ';
-	// }
+	while (current != NULL) {
+		if (strcmp(current->entity, entity) == 0) {
+			break;
+		}
+		current = current->next;
+	}
+	if (current == NULL) {
+		current = (INTENT_PTR) malloc(sizeof(INTENT));
+		current->entity = (char *) calloc(1, MAX_ENTITY * sizeof(char));
+		current->who = (char *) calloc(1, MAX_RESPONSE * sizeof(char));
+		current->what = (char *) calloc(1, MAX_RESPONSE * sizeof(char));
+		current->where = (char *) calloc(1, MAX_RESPONSE * sizeof(char));
+	}
 
-	// printf("entity=%s\n", current->entity);
-	return KB_INVALID;
+	if (!current) {
+		return KB_NOMEM;
+	}
 
+	snprintf(current->entity, MAX_ENTITY, "%s", entity);
+	if (compare_token(intent, WHAT) == 0) {
+		snprintf(current->what, MAX_ENTITY, "%s", response);
+	} else if (compare_token(intent, WHERE) == 0) {
+		snprintf(current->where, MAX_ENTITY, "%s", response);
+	} else if (compare_token(intent, WHO) == 0) {
+		snprintf(current->who, MAX_ENTITY, "%s", response);
+	}
+
+	if (head == NULL) {
+		head = current;
+		end = head;
+	} else {
+		end->next = current;
+		end = current;
+	}
+	return KB_OK;
 }
 
 

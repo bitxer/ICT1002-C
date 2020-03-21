@@ -218,7 +218,7 @@ int chatbot_do_question(int inc, char *inv[], char *response, int n) {
 	int result = 100;
 	int indx = 0;
 	if (inc > 1) {
-		if (compare_token(inv[1], "is") || compare_token(inv[1], "are")){
+		if (!compare_token(inv[1], "is") || !compare_token(inv[1], "are")){
 			indx = 2;
 		} else {
 			indx = 1;
@@ -227,7 +227,7 @@ int chatbot_do_question(int inc, char *inv[], char *response, int n) {
 	} else {
 		snprintf(response, n, "Please ask a question with an entity.");
 	}
-
+	
 	if (result == KB_NOTFOUND) {
 		// Rebuild question to be displayed
 		char question[MAX_INPUT] = "";
@@ -245,7 +245,14 @@ int chatbot_do_question(int inc, char *inv[], char *response, int n) {
 		question[0] = toupper(question[0]);
 		char ans[MAX_RESPONSE];
 		prompt_user(ans, MAX_RESPONSE, "I don't know. %s?", question);
-		knowledge_put(inv[0], inv[indx], ans);
+		result = knowledge_put(inv[0], inv[indx] , ans);
+		if (result == KB_OK){
+			snprintf(response, MAX_RESPONSE, "Thank you.");
+		} else if (result == KB_NOMEM) {
+			snprintf(response, MAX_RESPONSE, "Insfficient memory space");
+		} else if (result == KB_INVALID) {
+			snprintf(response, MAX_RESPONSE, "Invalid intent specified");
+		}
 	}
 	return 0;
 
@@ -362,4 +369,12 @@ int chatbot_do_smalltalk(int inc, char *inv[], char *response, int n) {
 
 	return 0;
 
+}
+
+int is_valid_intent(const char * intent) {
+	if (compare_token(intent, WHAT) == 0 || compare_token(intent, WHERE) == 0 || compare_token(intent, WHO) == 0) {
+		return KB_OK;
+	} else {
+		return KB_INVALID;
+	}
 }

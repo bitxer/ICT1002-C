@@ -41,6 +41,18 @@
 #define WHAT    "WHAT"
 #define WHO     "WHO"
 
+/* Data structure for Intent */
+struct Intent {
+    char * entity;
+    char * who;
+    char * what;
+    char * where;
+    struct Intent *next;
+};
+
+typedef struct Intent INTENT;
+typedef INTENT *INTENT_PTR;
+
 /* functions defined in main.c */
 int compare_token(const char *token1, const char *token2);
 void prompt_user(char *buf, int n, const char *format, ...);
@@ -70,13 +82,6 @@ int knowledge_read(FILE *f);
 void knowledge_write(FILE *f);
 void strtoupper(char * string);
 
+int is_valid_intent(const char * intent);
 
-/* Data structure for Intent */
-typedef struct Intent {
-    char entity[MAX_ENTITY];
-    char response[MAX_RESPONSE];
-    struct Intent *next;
-} Intent;
-
-#define INTENTSIZE() (sizeof(Intent))
 #endif
