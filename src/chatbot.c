@@ -49,9 +49,7 @@
  * Returns: the name of the chatbot as a null-terminated string
  */
 const char *chatbot_botname() {
-
 	return "Chatbot";
-
 }
 
 
@@ -61,9 +59,7 @@ const char *chatbot_botname() {
  * Returns: the name of the user as a null-terminated string
  */
 const char *chatbot_username() {
-
 	return "User";
-
 }
 
 
@@ -133,11 +129,8 @@ int chatbot_is_exit(const char *intent) {
  *   0 (the chatbot always continues chatting after a question)
  */
 int chatbot_do_exit(int inc, char *inv[], char *response, int n) {
-
 	snprintf(response, n, "Goodbye!");
-
 	return 1;
-
 }
 
 
@@ -152,9 +145,7 @@ int chatbot_do_exit(int inc, char *inv[], char *response, int n) {
  *  0, otherwise
  */
 int chatbot_is_load(const char *intent) {
-
 	return compare_token(intent, "load") == 0;
-
 }
 
 
@@ -317,8 +308,51 @@ int chatbot_is_save(const char *intent) {
  *   0 (the chatbot always continues chatting after saving knowledge)
  */
 int chatbot_do_save(int inc, char *inv[], char *response, int n) {
+	char * invalidfs = "Please enter a filename";
+	if (inc < 2) {
+		snprintf(response, n, "%s", invalidfs);
+		return 0;
+	}
 
-	/* TODO: implement */
+	int indx = 1;
+	if (compare_token(inv[1], "as") == 0 || compare_token(inv[1], "to") == 0){
+		indx = 2;
+	}
+
+	if (indx == 2 && inc < 3) {
+		snprintf(response, n, "%s", invalidfs);
+		return 0;
+	}
+	
+	char * filename = inv[indx];
+	if (filename[0] == 0) {
+		snprintf(response, n, "%s", invalidfs);
+		return 0;
+	}
+	FILE * file;
+	file = fopen(filename, "r");
+	if (file != NULL) {
+		char ans[3];
+		prompt_user(ans, 3, "%s is present. Do you want to overwrite it? [Y/n]", filename);
+		fclose(file);
+
+		switch (ans[0]) {
+			case 'n':
+				snprintf(response, n, "My knowledge is not saved as the file provided exists");
+				return 0;
+			case 'Y':
+				break;
+			default:
+				snprintf(response, n, "My knowledge is not saved as the file exists and I do not understand the response.");
+				return 0;
+
+		}
+	}
+	file = fopen(filename, "w");
+	knowledge_write(file);
+	fclose(file);
+	
+	snprintf(response, n, "My knowledge has been saved to %s", filename);
 
 	return 0;
 
@@ -337,7 +371,6 @@ int chatbot_do_save(int inc, char *inv[], char *response, int n) {
  *  0, otherwise
  */
 int chatbot_is_smalltalk(const char *intent) {
-
 	return compare_token("Hello", intent) == 0 ||
 			compare_token("It's", intent) == 0 || 
 			compare_token("Good", intent) == 0 ||

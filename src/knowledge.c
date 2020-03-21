@@ -101,6 +101,7 @@ int knowledge_put(const char *intent, const char *entity, const char *response) 
 		current->who = (char *) calloc(1, MAX_RESPONSE * sizeof(char));
 		current->what = (char *) calloc(1, MAX_RESPONSE * sizeof(char));
 		current->where = (char *) calloc(1, MAX_RESPONSE * sizeof(char));
+		current->next = NULL;
 	}
 
 	if (!current) {
@@ -160,7 +161,37 @@ void knowledge_reset() {
  *   f - the file
  */
 void knowledge_write(FILE *f) {
+	int end_what = 7;
+	int end_where = end_what + 1 + 8; 
 
-	/* TODO: implement */
+	// int max_line_length = MAX_ENTITY + 1 + MAX_RESPONSE + 1;
+	INTENT_PTR current = head;
+	// Save what to file
+	fputs("[what]\n", f);
+	while (current != NULL) {
+		if (current->what[0] != '\0') {
+			fprintf(f, "%s=%s\n", current->entity, current->what);
+		}
+		current = current->next;
+	}
 
+	// Save where to file
+	fputs("\n[where]\n", f);
+	current = head;
+	while (current != NULL) {
+		if (current->where[0] != '\0') {
+			fprintf(f, "%s=%s\n", current->entity, current->where);
+		}
+		current = current->next;
+	}
+
+	// Save who to file
+	fputs("\n[who]\n", f);
+	current = head;
+	while (current != NULL) {
+		if (current->who[0] != '\0') {
+			fprintf(f, "%s=%s\n", current->entity, current->who);
+		}
+		current = current->next;
+	}
 }
