@@ -35,7 +35,7 @@ INTENT_PTR end = NULL;
  *   KB_INVALID, if 'intent' is not a recognised question word
  */
 int knowledge_get(const char *intent, const char *entity, char *response, int n) {
-	if (is_valid_intent(intent) == KB_INVALID) {
+	if (chatbot_is_smalltalk(intent) == 0) {
 		// This should not happen since checking have been done previously
 		// Included as safety net
 		snprintf(response, n, "I don't understand \"%s\".", intent);
@@ -95,6 +95,7 @@ int knowledge_put(const char *intent, const char *entity, const char *response) 
 		}
 		current = current->next;
 	}
+	printf("%s", entity);
 	if (current == NULL) {
 		current = (INTENT_PTR) malloc(sizeof(INTENT));
 		current->entity = (char *) calloc(1, MAX_ENTITY * sizeof(char));

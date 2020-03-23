@@ -82,6 +82,5 @@ int knowledge_read(FILE *f);
 void knowledge_write(FILE *f);
 void strtoupper(char * string);
 
-int is_valid_intent(const char * intent);
 
 #endif

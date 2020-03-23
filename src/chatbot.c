@@ -401,11 +401,3 @@ int chatbot_do_smalltalk(int inc, char *inv[], char *response, int n) {
 		}
 	return 0;
 }
-
-int is_valid_intent(const char * intent) {
-	if (compare_token(intent, WHAT) == 0 || compare_token(intent, WHERE) == 0 || compare_token(intent, WHO) == 0) {
-		return KB_OK;
-	} else {
-		return KB_INVALID;
-	}
-}
