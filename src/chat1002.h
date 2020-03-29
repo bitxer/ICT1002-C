@@ -43,10 +43,10 @@
 
 /* Data structure for Intent */
 struct Intent {
-    char * entity;
-    char * who;
-    char * what;
-    char * where;
+    char entity[MAX_ENTITY];
+    char who[MAX_RESPONSE];
+    char what[MAX_RESPONSE];
+    char where[MAX_RESPONSE];
     struct Intent *next;
 };
 

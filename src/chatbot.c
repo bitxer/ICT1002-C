@@ -159,9 +159,35 @@ int chatbot_is_load(const char *intent) {
  *   0 (the chatbot always continues chatting after loading knowledge)
  */
 int chatbot_do_load(int inc, char *inv[], char *response, int n) {
+	char * invalidfs = "Please enter a filename";
+	if (inc < 2) {
+		snprintf(response, n, "%s", invalidfs);
+		return 0;
+	}
 
-	/* TODO: implement */
+	int indx = 1;
+	if (compare_token(inv[1], "from") == 0){
+		indx = 2;
+	}
 
+	if (indx == 2 && inc < 3) {
+		snprintf(response, n, "%s", invalidfs);
+		return 0;
+	}
+	
+	FILE * fp;
+	fp = fopen(inv[indx], "r");
+	if (fp != NULL) {
+		int result = knowledge_read(fp);
+		fclose(fp);
+		if (result == KB_NOMEM){
+			snprintf(response, n, "Sorry, I ran out of memory");
+		} else {
+			snprintf(response, n, "Read %d responses from %s", result, inv[indx]);
+		}
+	} else {
+		snprintf(response, n, "File %s not found", inv[indx]);
+	}
 	return 0;
 
 }

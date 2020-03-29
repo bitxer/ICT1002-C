@@ -35,7 +35,7 @@ INTENT_PTR end = NULL;
  *   KB_INVALID, if 'intent' is not a recognised question word
  */
 int knowledge_get(const char *intent, const char *entity, char *response, int n) {
-	if (chatbot_is_smalltalk(intent) == 0) {
+	if (chatbot_is_question(intent) == 0) {
 		// This should not happen since checking have been done previously
 		// Included as safety net
 		snprintf(response, n, "I don't understand \"%s\".", intent);
@@ -83,33 +83,35 @@ int knowledge_get(const char *intent, const char *entity, char *response, int n)
  *   KB_INVALID, if the intent is not a valid question word
  */
 int knowledge_put(const char *intent, const char *entity, const char *response) {
-	if (is_valid_intent(intent) == KB_INVALID) {
+	if (chatbot_is_question(intent) == KB_INVALID) {
 		return KB_INVALID;
 	}
-
+	int found = 0;
 	INTENT_PTR current = head;
-
 	while (current != NULL) {
-		if (strcmp(current->entity, entity) == 0) {
+		// printf("entity: %s | intent: %s | current: %p | current->entity: %s | current->next: %x\n", entity, intent, current, current->entity, current->next);
+		if (compare_token(current->entity, entity) == 0) {
+			found = 1;
 			break;
 		}
 		current = current->next;
 	}
-	printf("%s", entity);
+
 	if (current == NULL) {
-		current = (INTENT_PTR) malloc(sizeof(INTENT));
-		current->entity = (char *) calloc(1, MAX_ENTITY * sizeof(char));
-		current->who = (char *) calloc(1, MAX_RESPONSE * sizeof(char));
-		current->what = (char *) calloc(1, MAX_RESPONSE * sizeof(char));
-		current->where = (char *) calloc(1, MAX_RESPONSE * sizeof(char));
+		current = (INTENT_PTR) calloc(1, sizeof(INTENT));
+		if (current == NULL) {
+			return KB_NOMEM;
+		}
 		current->next = NULL;
 	}
 
 	if (!current) {
 		return KB_NOMEM;
 	}
+	if (!found){
+		snprintf(current->entity, MAX_ENTITY, "%s", entity);
+	}
 
-	snprintf(current->entity, MAX_ENTITY, "%s", entity);
 	if (compare_token(intent, WHAT) == 0) {
 		snprintf(current->what, MAX_ENTITY, "%s", response);
 	} else if (compare_token(intent, WHERE) == 0) {
@@ -121,7 +123,7 @@ int knowledge_put(const char *intent, const char *entity, const char *response) 
 	if (head == NULL) {
 		head = current;
 		end = head;
-	} else {
+	} else if (!found) {
 		end->next = current;
 		end = current;
 	}
@@ -139,9 +141,63 @@ int knowledge_put(const char *intent, const char *entity, const char *response) 
  */
 int knowledge_read(FILE *f) {
 
-	/* TODO: implement */
+	int keypair = 0;
 
-	return 0;
+	int len = MAX_ENTITY + 1 + MAX_RESPONSE + 1;
+	int linelen = 0;
+	char * buf = calloc(1, len);
+
+	if (buf == NULL) {
+		return KB_NOMEM;
+	}
+	
+	char section[6];
+	int valid = 0;
+	while (!feof(f)) {
+		linelen = getline(&buf, (size_t *) &len, f);
+		if (*buf == '[' && *(buf + linelen - 3) == ']') {
+			buf = strtok(buf, "[");
+			snprintf(section, 6, "%s", strtok(buf, "]"));
+			valid = chatbot_is_question(section);
+			continue;
+		} else if (!valid) {
+			continue;
+		}
+		
+		char entity[MAX_ENTITY];
+		memset(entity, 0, MAX_ENTITY);
+		snprintf(entity, MAX_ENTITY, "%s", strtok(buf, "="));
+
+		if (isspace(entity[0])){
+			continue;
+		}
+
+		char response[MAX_RESPONSE];
+		memset(response, 0, MAX_RESPONSE);
+		snprintf(response, MAX_RESPONSE, "%s", strtok(NULL, "\r\n"));
+
+		int result = knowledge_put(section, entity, response);
+		if (result != KB_OK) {
+			return result;
+		}
+		// reset variables
+		memset(buf, 0, len);
+		linelen = 0;
+		printf("entity: %s\n", entity);
+		keypair++;
+	}
+
+	// INTENT_PTR current = head;
+	// while (current != NULL) {
+	// 	printf("entity: %s\n", current->entity);
+	// 	printf("what: %s\n", current->what);
+	// 	printf("who: %s\n", current->who);
+	// 	printf("where: %s\n", current->where);
+	// 	printf("----------------------\n\n");
+	// 	current = current->next;
+	// }
+
+	return keypair;
 }
 
 
