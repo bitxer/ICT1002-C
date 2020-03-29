@@ -89,7 +89,6 @@ int knowledge_put(const char *intent, const char *entity, const char *response) 
 	int found = 0;
 	INTENT_PTR current = head;
 	while (current != NULL) {
-		// printf("entity: %s | intent: %s | current: %p | current->entity: %s | current->next: %x\n", entity, intent, current, current->entity, current->next);
 		if (compare_token(current->entity, entity) == 0) {
 			found = 1;
 			break;
