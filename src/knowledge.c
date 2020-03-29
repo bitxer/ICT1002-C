@@ -45,7 +45,7 @@ int knowledge_get(const char *intent, const char *entity, char *response, int n)
 	INTENT_PTR current = head;
 
 	while (current != NULL) {
-		if (strcmp(current->entity, entity) == 0) {
+		if (compare_token(current->entity, entity) == 0) {
 			char * buf = NULL;;
 			if (compare_token(intent, WHAT) == 0) {
 				buf = current->what;
@@ -163,14 +163,14 @@ int knowledge_read(FILE *f) {
 		} else if (!valid) {
 			continue;
 		}
-		
+
+		if (!isalpha(buf[0])){
+			continue;
+		}
+
 		char entity[MAX_ENTITY];
 		memset(entity, 0, MAX_ENTITY);
 		snprintf(entity, MAX_ENTITY, "%s", strtok(buf, "="));
-
-		if (isspace(entity[0])){
-			continue;
-		}
 
 		char response[MAX_RESPONSE];
 		memset(response, 0, MAX_RESPONSE);
@@ -183,7 +183,6 @@ int knowledge_read(FILE *f) {
 		// reset variables
 		memset(buf, 0, len);
 		linelen = 0;
-		printf("entity: %s\n", entity);
 		keypair++;
 	}
 
