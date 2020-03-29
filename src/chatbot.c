@@ -301,9 +301,8 @@ int chatbot_is_reset(const char *intent) {
  *   0 (the chatbot always continues chatting after beign reset)
  */
 int chatbot_do_reset(int inc, char *inv[], char *response, int n) {
-
-	/* TODO: implement */
-
+	knowledge_reset();
+	snprintf(response, MAX_RESPONSE, "Chatbot reset");
 	return 0;
 
 }

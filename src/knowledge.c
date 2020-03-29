@@ -203,9 +203,17 @@ int knowledge_read(FILE *f) {
  * Reset the knowledge base, removing all know entitities from all intents.
  */
 void knowledge_reset() {
+	INTENT_PTR tmp = NULL;
 
-	/* TODO: implement */
-
+	while (head != NULL) {
+		printf("run ");
+		tmp = head->next;
+		memset(head, 0, sizeof(INTENT));
+		free(head);
+		head = tmp;
+	}
+	head = NULL;
+	end = head;
 }
 
 
