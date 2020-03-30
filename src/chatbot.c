@@ -49,9 +49,7 @@
  * Returns: the name of the chatbot as a null-terminated string
  */
 const char *chatbot_botname() {
-
 	return "Chatbot";
-
 }
 
 
@@ -61,9 +59,7 @@ const char *chatbot_botname() {
  * Returns: the name of the user as a null-terminated string
  */
 const char *chatbot_username() {
-
 	return "User";
-
 }
 
 
@@ -78,10 +74,10 @@ const char *chatbot_username() {
  *   1, if the chatbot should stop (i.e. it detected the EXIT intent)
  */
 int chatbot_main(int inc, char *inv[], char *response, int n) {
-
 	/* check for empty input */
 	if (inc < 1) {
-		snprintf(response, n, "");
+		memset(response, 0, n);
+		// snprintf(response, n, "");
 		return 0;
 	}
 
@@ -133,11 +129,8 @@ int chatbot_is_exit(const char *intent) {
  *   0 (the chatbot always continues chatting after a question)
  */
 int chatbot_do_exit(int inc, char *inv[], char *response, int n) {
-
 	snprintf(response, n, "Goodbye!");
-
 	return 1;
-
 }
 
 
@@ -152,11 +145,7 @@ int chatbot_do_exit(int inc, char *inv[], char *response, int n) {
  *  0, otherwise
  */
 int chatbot_is_load(const char *intent) {
-
-	/* TODO: implement */
-
-	return 0;
-
+	return compare_token(intent, "load") == 0;
 }
 
 
@@ -170,9 +159,35 @@ int chatbot_is_load(const char *intent) {
  *   0 (the chatbot always continues chatting after loading knowledge)
  */
 int chatbot_do_load(int inc, char *inv[], char *response, int n) {
+	char * invalidfs = "Please enter a filename";
+	if (inc < 2) {
+		snprintf(response, n, "%s", invalidfs);
+		return 0;
+	}
 
-	/* TODO: implement */
+	int indx = 1;
+	if (compare_token(inv[1], "from") == 0){
+		indx = 2;
+	}
 
+	if (indx == 2 && inc < 3) {
+		snprintf(response, n, "%s", invalidfs);
+		return 0;
+	}
+	
+	FILE * fp;
+	fp = fopen(inv[indx], "r");
+	if (fp != NULL) {
+		int result = knowledge_read(fp);
+		fclose(fp);
+		if (result == KB_NOMEM){
+			snprintf(response, n, "Sorry, I ran out of memory");
+		} else {
+			snprintf(response, n, "Read %d responses from %s", result, inv[indx]);
+		}
+	} else {
+		snprintf(response, n, "File %s not found", inv[indx]);
+	}
 	return 0;
 
 }
@@ -198,6 +213,30 @@ int chatbot_is_question(const char *intent) {
 	return 0;
 }
 
+/*
+ * Concatenate array safely into a string.
+ * 
+ * Input:
+ *  dest		- Memory location to store string to
+ * 	src			- Array containing words to be contained in strings
+ * 	src_size	- Number of elements in array
+ * 	dest_size	- Size of destination buffer
+ * 	offset		- Offset in src where first word is contained
+ */
+void safe_concat(char *dest, char *src[], const size_t src_size, const size_t dest_size, int offset){
+	for (int i = offset; i < src_size; i++){
+		// Check length
+		if (strlen(dest) < dest_size + 2) {
+			strcat(dest, src[i]);
+			// Check if last element
+			if (i != src_size - 1){
+				strcat(dest, " ");
+			}
+		} else {
+			strncat(dest, src[i], dest_size - strlen(dest) - 1);
+		}
+	}
+}
 
 /*
  * Answer a question.
@@ -210,48 +249,56 @@ int chatbot_is_question(const char *intent) {
  * function is used.
  *
  * Returns:
+ *   1 (Chatbot ran out of memory space)
  *   0 (the chatbot always continues chatting after a question)
  */
 int chatbot_do_question(int inc, char *inv[], char *response, int n) {
 	int result = 100;
 	int indx = 0;
+	char * entity;
+	entity = calloc(1, MAX_ENTITY);
+	if (entity == NULL){
+		snprintf(response, n, "Insfficient memory space");
+		return 1;
+	}
+
 	if (inc > 1) {
 		if (!compare_token(inv[1], "is") || !compare_token(inv[1], "are")){
 			indx = 2;
 		} else {
 			indx = 1;
 		}
-		result = knowledge_get(inv[0], inv[indx], response, n);
+		safe_concat(entity, inv, inc, MAX_ENTITY, indx);
+		result = knowledge_get(inv[0], entity, response, n);
 	} else {
 		snprintf(response, n, "Please ask a question with an entity.");
 	}
 	
 	if (result == KB_NOTFOUND) {
 		// Rebuild question to be displayed
-		char question[MAX_INPUT] = "";
-		int len = 0;
-		for (int i = 0; i < inc; i++) {
-			len += strlen(inv[i]) + 1;
-			strcat(question, inv[i]);
-			question[len] = '\0';
-			question[len - 1] = ' ';
+		char *question;
+		question = calloc(1, MAX_INPUT);
+		if (question == NULL){
+			snprintf(response, n, "Insfficient memory space");
+			return 1;
 		}
-		// Remove space
-		question[len - 1] = '\0';
+		safe_concat(question, inv, inc, MAX_INPUT, 0);
 
 		// Capitalise first word in question
 		question[0] = toupper(question[0]);
 		char ans[MAX_RESPONSE];
 		prompt_user(ans, MAX_RESPONSE, "I don't know. %s?", question);
-		result = knowledge_put(inv[0], inv[indx] , ans);
+		result = knowledge_put(inv[0], entity , ans);
 		if (result == KB_OK){
-			snprintf(response, MAX_RESPONSE, "Thank you.");
+			snprintf(response, n, "Thank you.");
 		} else if (result == KB_NOMEM) {
-			snprintf(response, MAX_RESPONSE, "Insfficient memory space");
+			snprintf(response, n, "Insfficient memory space");
 		} else if (result == KB_INVALID) {
-			snprintf(response, MAX_RESPONSE, "Invalid intent specified");
+			snprintf(response, n, "Invalid intent specified");
 		}
+		free(question);
 	}
+	free(entity);
 	return 0;
 
 }
@@ -286,9 +333,8 @@ int chatbot_is_reset(const char *intent) {
  *   0 (the chatbot always continues chatting after beign reset)
  */
 int chatbot_do_reset(int inc, char *inv[], char *response, int n) {
-
-	/* TODO: implement */
-
+	knowledge_reset();
+	snprintf(response, MAX_RESPONSE, "Chatbot reset");
 	return 0;
 
 }
@@ -305,11 +351,7 @@ int chatbot_do_reset(int inc, char *inv[], char *response, int n) {
  *  0, otherwise
  */
 int chatbot_is_save(const char *intent) {
-
-	/* TODO: implement */
-
-	return 0;
-
+	return compare_token(intent, "save") == 0;
 }
 
 
@@ -323,8 +365,51 @@ int chatbot_is_save(const char *intent) {
  *   0 (the chatbot always continues chatting after saving knowledge)
  */
 int chatbot_do_save(int inc, char *inv[], char *response, int n) {
+	char * invalidfs = "Please enter a filename";
+	if (inc < 2) {
+		snprintf(response, n, "%s", invalidfs);
+		return 0;
+	}
 
-	/* TODO: implement */
+	int indx = 1;
+	if (compare_token(inv[1], "as") == 0 || compare_token(inv[1], "to") == 0){
+		indx = 2;
+	}
+
+	if (indx == 2 && inc < 3) {
+		snprintf(response, n, "%s", invalidfs);
+		return 0;
+	}
+	
+	char * filename = inv[indx];
+	if (filename[0] == 0) {
+		snprintf(response, n, "%s", invalidfs);
+		return 0;
+	}
+	FILE * file;
+	file = fopen(filename, "r");
+	if (file != NULL) {
+		char ans[3];
+		prompt_user(ans, 3, "%s is present. Do you want to overwrite it? [Y/n]", filename);
+		fclose(file);
+
+		switch (ans[0]) {
+			case 'n':
+				snprintf(response, n, "My knowledge is not saved as the file provided exists");
+				return 0;
+			case 'Y':
+				break;
+			default:
+				snprintf(response, n, "My knowledge is not saved as the file exists and I do not understand the response.");
+				return 0;
+
+		}
+	}
+	file = fopen(filename, "w");
+	knowledge_write(file);
+	fclose(file);
+	
+	snprintf(response, n, "My knowledge has been saved to %s", filename);
 
 	return 0;
 
@@ -343,7 +428,6 @@ int chatbot_do_save(int inc, char *inv[], char *response, int n) {
  *  0, otherwise
  */
 int chatbot_is_smalltalk(const char *intent) {
-
 	return compare_token("Hello", intent) == 0 ||
 			compare_token("It's", intent) == 0 || 
 			compare_token("Good", intent) == 0 ||
@@ -373,12 +457,4 @@ int chatbot_do_smalltalk(int inc, char *inv[], char *response, int n) {
 			return 1;
 		}
 	return 0;
-}
-
-int is_valid_intent(const char * intent) {
-	if (compare_token(intent, WHAT) == 0 || compare_token(intent, WHERE) == 0 || compare_token(intent, WHO) == 0) {
-		return KB_OK;
-	} else {
-		return KB_INVALID;
-	}
 }

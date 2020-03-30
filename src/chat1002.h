@@ -43,10 +43,10 @@
 
 /* Data structure for Intent */
 struct Intent {
-    char * entity;
-    char * who;
-    char * what;
-    char * where;
+    char entity[MAX_ENTITY];
+    char who[MAX_RESPONSE];
+    char what[MAX_RESPONSE];
+    char where[MAX_RESPONSE];
     struct Intent *next;
 };
 
@@ -80,8 +80,6 @@ int knowledge_put(const char *intent, const char *entity, const char *response);
 void knowledge_reset();
 int knowledge_read(FILE *f);
 void knowledge_write(FILE *f);
-void strtoupper(char * string);
-
-int is_valid_intent(const char * intent);
+void safe_concat(char *dest, char *src[], const size_t src_size, const size_t dest_size, int offset);
 
 #endif
