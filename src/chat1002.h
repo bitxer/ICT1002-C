@@ -80,6 +80,6 @@ int knowledge_put(const char *intent, const char *entity, const char *response);
 void knowledge_reset();
 int knowledge_read(FILE *f);
 void knowledge_write(FILE *f);
-void build_entity(int inc, int stop, char *dest, char *src[]);
+void safe_concat(char *dest, char *src[], const size_t src_size, const size_t dest_size, int offset);
 
 #endif

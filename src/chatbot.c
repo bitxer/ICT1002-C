@@ -214,16 +214,18 @@ int chatbot_is_question(const char *intent) {
 }
 
 
-void build_entity(int inc, int stop, char *dest, char *src[]){
-	inc--;
-	if (inc + 1 == stop) {
-		strcat(dest, src[inc]);
-		strcat(dest, " ");
-		return;
-	} else {
-		build_entity(inc, stop, dest, src);
-		strcat(dest, src[inc]);
-		strcat(dest, " ");
+void safe_concat(char *dest, char *src[], const size_t src_size, const size_t dest_size, int offset){
+	for (int i = offset; i < src_size; i++){
+		// Check length
+		if (strlen(dest) < dest_size + 2) {
+			strcat(dest, src[i]);
+			// Check if last element
+			if (i != src_size - 1){
+				strcat(dest, " ");
+			}
+		} else {
+			strncat(dest, src[i], dest_size - strlen(dest) - 1);
+		}
 	}
 }
 
@@ -243,20 +245,21 @@ void build_entity(int inc, int stop, char *dest, char *src[]){
 int chatbot_do_question(int inc, char *inv[], char *response, int n) {
 	int result = 100;
 	int indx = 0;
-	// char entity[MAX_ENTITY];
 	char * entity;
 	entity = calloc(1, MAX_ENTITY);
-	// memset(entity, 0, MAX_ENTITY);
+	if (entity == NULL){
+		snprintf(response, n, "Insfficient memory space");
+		return;
+	}
+
 	if (inc > 1) {
 		if (!compare_token(inv[1], "is") || !compare_token(inv[1], "are")){
 			indx = 2;
 		} else {
 			indx = 1;
 		}
-		build_entity(inc, indx +1, entity, inv);
-		int i = 0;
-		for (i = 0; entity[i] != '\0'; i++);
-		entity[i - 1] = '\0';
+		safe_concat(entity, inv, inc, MAX_ENTITY, indx);
+		printf("entity: %s;\n", entity);
 		result = knowledge_get(inv[0], entity, response, n);
 	} else {
 		snprintf(response, n, "Please ask a question with an entity.");
@@ -264,16 +267,13 @@ int chatbot_do_question(int inc, char *inv[], char *response, int n) {
 	
 	if (result == KB_NOTFOUND) {
 		// Rebuild question to be displayed
-		char question[MAX_INPUT] = "";
-		int len = 0;
-		for (int i = 0; i < inc; i++) {
-			len += strlen(inv[i]) + 1;
-			strcat(question, inv[i]);
-			question[len] = '\0';
-			question[len - 1] = ' ';
+		char *question;
+		question = calloc(1, MAX_INPUT);
+		if (question == NULL){
+			snprintf(response, n, "Insfficient memory space");
+			return;
 		}
-		// Remove space
-		question[len - 1] = '\0';
+		safe_concat(question, inv, inc, MAX_INPUT, 0);
 
 		// Capitalise first word in question
 		question[0] = toupper(question[0]);
@@ -281,13 +281,15 @@ int chatbot_do_question(int inc, char *inv[], char *response, int n) {
 		prompt_user(ans, MAX_RESPONSE, "I don't know. %s?", question);
 		result = knowledge_put(inv[0], entity , ans);
 		if (result == KB_OK){
-			snprintf(response, MAX_RESPONSE, "Thank you.");
+			snprintf(response, n, "Thank you.");
 		} else if (result == KB_NOMEM) {
-			snprintf(response, MAX_RESPONSE, "Insfficient memory space");
+			snprintf(response, n, "Insfficient memory space");
 		} else if (result == KB_INVALID) {
-			snprintf(response, MAX_RESPONSE, "Invalid intent specified");
+			snprintf(response, n, "Invalid intent specified");
 		}
+		free(question);
 	}
+	free(entity);
 	return 0;
 
 }

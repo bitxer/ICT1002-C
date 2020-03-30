@@ -46,7 +46,7 @@ int knowledge_get(const char *intent, const char *entity, char *response, int n)
 
 	while (current != NULL) {
 		if (compare_token(current->entity, entity) == 0) {
-			char * buf = NULL;;
+			char * buf = NULL;
 			if (compare_token(intent, WHAT) == 0) {
 				buf = current->what;
 			} else if (compare_token(intent, WHERE) == 0) {
