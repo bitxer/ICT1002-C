@@ -216,15 +216,15 @@ int chatbot_is_question(const char *intent) {
 
 void build_entity(int inc, int stop, char *dest, char *src[]){
 	inc--;
-	if (inc == stop) {
-		snprintf(dest, MAX_ENTITY, "%s ", src[inc]);
+	if (inc + 1 == stop) {
 		strcat(dest, src[inc]);
 		strcat(dest, " ");
 		return;
+	} else {
+		build_entity(inc, stop, dest, src);
+		strcat(dest, src[inc]);
+		strcat(dest, " ");
 	}
-	build_entity(inc, stop, dest, src);
-	strcat(dest, src[inc]);
-	strcat(dest, " ");
 }
 
 /*
@@ -243,7 +243,10 @@ void build_entity(int inc, int stop, char *dest, char *src[]){
 int chatbot_do_question(int inc, char *inv[], char *response, int n) {
 	int result = 100;
 	int indx = 0;
-	char entity[MAX_ENTITY];
+	// char entity[MAX_ENTITY];
+	char * entity;
+	entity = calloc(1, MAX_ENTITY);
+	// memset(entity, 0, MAX_ENTITY);
 	if (inc > 1) {
 		if (!compare_token(inv[1], "is") || !compare_token(inv[1], "are")){
 			indx = 2;
@@ -251,6 +254,9 @@ int chatbot_do_question(int inc, char *inv[], char *response, int n) {
 			indx = 1;
 		}
 		build_entity(inc, indx +1, entity, inv);
+		int i = 0;
+		for (i = 0; entity[i] != '\0'; i++);
+		entity[i - 1] = '\0';
 		result = knowledge_get(inv[0], entity, response, n);
 	} else {
 		snprintf(response, n, "Please ask a question with an entity.");
