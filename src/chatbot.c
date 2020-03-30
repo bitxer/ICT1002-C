@@ -74,10 +74,10 @@ const char *chatbot_username() {
  *   1, if the chatbot should stop (i.e. it detected the EXIT intent)
  */
 int chatbot_main(int inc, char *inv[], char *response, int n) {
-
 	/* check for empty input */
 	if (inc < 1) {
-		snprintf(response, n, "");
+		memset(response, 0, n);
+		// snprintf(response, n, "");
 		return 0;
 	}
 
@@ -213,7 +213,16 @@ int chatbot_is_question(const char *intent) {
 	return 0;
 }
 
-
+/*
+ * Concatenate array safely into a string.
+ * 
+ * Input:
+ *  dest		- Memory location to store string to
+ * 	src			- Array containing words to be contained in strings
+ * 	src_size	- Number of elements in array
+ * 	dest_size	- Size of destination buffer
+ * 	offset		- Offset in src where first word is contained
+ */
 void safe_concat(char *dest, char *src[], const size_t src_size, const size_t dest_size, int offset){
 	for (int i = offset; i < src_size; i++){
 		// Check length
@@ -240,6 +249,7 @@ void safe_concat(char *dest, char *src[], const size_t src_size, const size_t de
  * function is used.
  *
  * Returns:
+ *   1 (Chatbot ran out of memory space)
  *   0 (the chatbot always continues chatting after a question)
  */
 int chatbot_do_question(int inc, char *inv[], char *response, int n) {
@@ -249,7 +259,7 @@ int chatbot_do_question(int inc, char *inv[], char *response, int n) {
 	entity = calloc(1, MAX_ENTITY);
 	if (entity == NULL){
 		snprintf(response, n, "Insfficient memory space");
-		return;
+		return 1;
 	}
 
 	if (inc > 1) {
@@ -259,7 +269,6 @@ int chatbot_do_question(int inc, char *inv[], char *response, int n) {
 			indx = 1;
 		}
 		safe_concat(entity, inv, inc, MAX_ENTITY, indx);
-		printf("entity: %s;\n", entity);
 		result = knowledge_get(inv[0], entity, response, n);
 	} else {
 		snprintf(response, n, "Please ask a question with an entity.");
@@ -271,7 +280,7 @@ int chatbot_do_question(int inc, char *inv[], char *response, int n) {
 		question = calloc(1, MAX_INPUT);
 		if (question == NULL){
 			snprintf(response, n, "Insfficient memory space");
-			return;
+			return 1;
 		}
 		safe_concat(question, inv, inc, MAX_INPUT, 0);
 
