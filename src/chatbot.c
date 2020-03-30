@@ -214,6 +214,19 @@ int chatbot_is_question(const char *intent) {
 }
 
 
+void build_entity(int inc, int stop, char *dest, char *src[]){
+	inc--;
+	if (inc == stop) {
+		snprintf(dest, MAX_ENTITY, "%s ", src[inc]);
+		strcat(dest, src[inc]);
+		strcat(dest, " ");
+		return;
+	}
+	build_entity(inc, stop, dest, src);
+	strcat(dest, src[inc]);
+	strcat(dest, " ");
+}
+
 /*
  * Answer a question.
  *
@@ -230,13 +243,15 @@ int chatbot_is_question(const char *intent) {
 int chatbot_do_question(int inc, char *inv[], char *response, int n) {
 	int result = 100;
 	int indx = 0;
+	char entity[MAX_ENTITY];
 	if (inc > 1) {
 		if (!compare_token(inv[1], "is") || !compare_token(inv[1], "are")){
 			indx = 2;
 		} else {
 			indx = 1;
 		}
-		result = knowledge_get(inv[0], inv[indx], response, n);
+		build_entity(inc, indx +1, entity, inv);
+		result = knowledge_get(inv[0], entity, response, n);
 	} else {
 		snprintf(response, n, "Please ask a question with an entity.");
 	}
@@ -258,7 +273,7 @@ int chatbot_do_question(int inc, char *inv[], char *response, int n) {
 		question[0] = toupper(question[0]);
 		char ans[MAX_RESPONSE];
 		prompt_user(ans, MAX_RESPONSE, "I don't know. %s?", question);
-		result = knowledge_put(inv[0], inv[indx] , ans);
+		result = knowledge_put(inv[0], entity , ans);
 		if (result == KB_OK){
 			snprintf(response, MAX_RESPONSE, "Thank you.");
 		} else if (result == KB_NOMEM) {
