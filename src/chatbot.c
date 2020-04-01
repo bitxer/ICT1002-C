@@ -431,7 +431,8 @@ int chatbot_is_smalltalk(const char *intent) {
 	return compare_token("Hello", intent) == 0 ||
 			compare_token("It's", intent) == 0 || 
 			compare_token("Good", intent) == 0 ||
-			compare_token("Goodbye", intent) == 0;
+			compare_token("Goodbye", intent) == 0 ||
+			compare_token("Tell", intent) == 0;
 }
 
 
@@ -455,6 +456,41 @@ int chatbot_do_smalltalk(int inc, char *inv[], char *response, int n) {
 		} else if (compare_token("Goodbye", inv[0]) == 0) {
 			snprintf(response, n, "Goodbye");
 			return 1;
+		} else if (compare_token("Tell", inv[0]) == 0) {
+			int res = rand() % 2;
+			char ans[MAX_RESPONSE];
+			memset(ans, 0, MAX_RESPONSE);
+			if (compare_token("riddle", inv[inc - 1]) == 0){
+				switch (res) {
+				case 0:
+					prompt_user(ans, MAX_RESPONSE, "What month of the year has 28 days?");
+					if (compare_token("All of them", ans) != 0 || compare_token("All", ans) != 0){
+						snprintf(response, n, "Wrong! The answer is: All of them");
+					} else {
+						snprintf(response, n, "Yes that is right!");
+					}
+					break;
+				case 1:
+					prompt_user(ans, MAX_RESPONSE, "What can’t talk but will reply when spoken to?");
+					if (compare_token("An echo", ans) != 0 || compare_token("echo", ans)){
+						snprintf(response, n, "Wrong! The answer is: An echo");
+					} else {
+						snprintf(response, n, "Yes that is right!");
+					}
+					break;
+				}
+			} else if (compare_token("joke", inv[inc - 1]) == 0){
+				switch (res) {
+				case 0:
+					snprintf(response, n, "A perfectionist walked into a bar… apparently, the bar wasn’t set high enough.");
+					break;
+				case 1:
+					snprintf(response, n, "Do I lose when the police officer says papers and I say scissors?");
+					break;
+				}
+			} else {
+				snprintf(response, n, "Hmmm... I can only tell you a joke or a riddle");
+			}
 		}
 	return 0;
 }
