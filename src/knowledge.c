@@ -206,7 +206,6 @@ void knowledge_reset() {
 	INTENT_PTR tmp = NULL;
 
 	while (head != NULL) {
-		printf("run ");
 		tmp = head->next;
 		memset(head, 0, sizeof(INTENT));
 		free(head);
