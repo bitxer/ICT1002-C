@@ -365,7 +365,7 @@ int chatbot_is_save(const char *intent) {
  *   0 (the chatbot always continues chatting after saving knowledge)
  */
 int chatbot_do_save(int inc, char *inv[], char *response, int n) {
-	char * invalidfs = "Please enter a filename";
+	char * invalidfs = "Please enter a filename in the following format: save to <filename>";
 	if (inc < 2) {
 		snprintf(response, n, "%s", invalidfs);
 		return 0;
