@@ -439,7 +439,7 @@ int chatbot_do_smalltalk(int inc, char *inv[], char *response, int n) {
 				switch (res) {
 				case 0:
 					prompt_user(ans, MAX_RESPONSE, "What month of the year has 28 days?");
-					if (compare_token("All of them", ans) != 0 || compare_token("All", ans) != 0){
+					if (compare_token("All of them", ans) && compare_token("All", ans) != 0){
 						snprintf(response, n, "Wrong! The answer is: All of them");
 					} else {
 						snprintf(response, n, "Yes that is right!");
@@ -447,7 +447,7 @@ int chatbot_do_smalltalk(int inc, char *inv[], char *response, int n) {
 					break;
 				case 1:
 					prompt_user(ans, MAX_RESPONSE, "What can’t talk but will reply when spoken to?");
-					if (compare_token("An echo", ans) != 0 || compare_token("echo", ans)){
+					if (compare_token("An echo", ans) && compare_token("echo", ans)){
 						snprintf(response, n, "Wrong! The answer is: An echo");
 					} else {
 						snprintf(response, n, "Yes that is right!");
